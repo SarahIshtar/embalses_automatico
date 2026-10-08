@@ -12,7 +12,7 @@ permissions:
 jobs:
   actualizar:
     name: ${{ matrix.proceso }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
     strategy:
       # Cada gráfico es independiente: si uno falla, los otros siguen.

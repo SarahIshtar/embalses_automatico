@@ -1,0 +1,2 @@
+# Saltos de línea LF siempre (los CSV los generan tanto Windows como GitHub Actions)
+* text=auto eol=lf

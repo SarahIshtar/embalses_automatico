@@ -1,0 +1,21 @@
+{
+  "notas": {
+    "linea": "Datos actualizados a {fecha}",
+    "cuencas": "Datos actualizados a {fecha}",
+    "embalses": "Datos actualizados a {fecha}"
+  },
+  "validacion": {
+    "dias_max_antiguedad": 14,
+    "linea_salto_max_puntos": 12,
+    "cuencas_diferencia_max_total": 0.5,
+    "embalses_caida_max_porcentaje": 5,
+    "embalses_coordenadas_conocidas_mal": [
+      "As Forcadas",
+      "Bao",
+      "Las Fitas",
+      "Las Portas",
+      "San Lorenzo",
+      "Santa Eulalia"
+    ]
+  }
+}

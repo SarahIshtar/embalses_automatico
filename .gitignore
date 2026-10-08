@@ -1,0 +1,21 @@
+# Entorno virtual y caché de Python
+venv/
+.venv/
+__pycache__/
+*.pyc
+
+# PDF descargados (nunca van al repositorio)
+informes/
+*.pdf
+
+# Credenciales: cualquier .json salvo los que necesita el proyecto
+*.json
+!graficos/*/metadata.json
+!config/config.json
+
+# Temporales (escritura atómica, editores, sistema)
+*.tmp
+.*.tmp
+*~
+.DS_Store
+Thumbs.db

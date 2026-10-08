@@ -1,0 +1,69 @@
+name: Embalses
+
+on:
+  schedule:
+    # Jueves a las 06:00 UTC = 08:00 en Madrid en horario de verano, 07:00 en invierno.
+    - cron: "0 6 * * 4"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  actualizar:
+    name: ${{ matrix.proceso }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      # Cada gráfico es independiente: si uno falla, los otros siguen.
+      fail-fast: false
+      matrix:
+        proceso: [linea, cuencas, embalses]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - uses: actions/setup-java@v4   # tabula
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Instalar Ghostscript   # camelot (respaldo de pdfium)
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq ghostscript
+
+      - name: Instalar dependencias
+        run: pip install -r requirements.txt
+
+      - name: Actualizar ${{ matrix.proceso }}
+        id: proceso
+        run: python -m procesos.${{ matrix.proceso }}
+
+      - name: Commit y push
+        if: steps.proceso.outputs.cambios == 'si'
+        env:
+          PROCESO: ${{ matrix.proceso }}
+          FECHA: ${{ steps.proceso.outputs.fecha }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "graficos/$PROCESO" "historicos/$PROCESO.csv"
+          if git diff --cached --quiet; then
+            echo "Nada que subir."
+            exit 0
+          fi
+          git commit -m "$PROCESO: datos a $FECHA"
+          # Otro job puede haber subido a la vez: rebase y reintento.
+          for intento in 1 2 3 4 5; do
+            if git pull --rebase origin "$GITHUB_REF_NAME" && git push origin "HEAD:$GITHUB_REF_NAME"; then
+              exit 0
+            fi
+            echo "Push fallido (intento $intento), reintentando…"
+            sleep $((intento * 10))
+          done
+          echo "::error title=$PROCESO - push::No se ha podido subir el commit tras 5 intentos"
+          exit 1
